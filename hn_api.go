@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -17,7 +16,7 @@ type HackerNews struct {
 	Url   string `json:"url"`
 }
 
-func main() {
+func GetHackerNews() []HackerNews {
 	res, err := http.Get("https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty")
 	if err != nil {
 		log.Fatal(err)
@@ -39,5 +38,6 @@ func main() {
 		json.Unmarshal(robots, &hn)
 		hns = append(hns, hn)
 	}
-	fmt.Println(hns[0].Title)
+
+	return hns
 }
