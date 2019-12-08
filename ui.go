@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/rivo/tview"
 )
 
@@ -10,9 +9,8 @@ func main() {
 
 	app := tview.NewApplication()
 	list := tview.NewList()
-	for i, s := range hns {
-		fmt.Printf("%T", i)
-		list.AddItem(s.Title, "", nil, nil)
+	for _, s := range hns {
+		list.AddItem(s.Title, "", 0, nil)
 	}
 	list.AddItem("Quit", "Press to exit", 'q', func() {
 		app.Stop()

@@ -252,6 +252,7 @@ func content(db *sql.DB, dbName, tableName string) {
 	// We display the data in a table embedded in a frame.
 	table := tview.NewTable().
 		SetFixed(1, 0).
+		//SetSeparator(tview.GraphicsVertBar).
 		SetBordersColor(tcell.ColorYellow)
 	frame := tview.NewFrame(table).
 		SetBorders(0, 0, 0, 0, 0, 0)

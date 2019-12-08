@@ -33,7 +33,7 @@ func GetHackerNews() []HackerNews {
 	var hn HackerNews
 	cnt := 0
 	for _, s := range idHn {
-		if cnt > 30 {
+		if cnt > 29 {
 			break
 		}
 		url := "https://hacker-news.firebaseio.com/v0/item/" + strconv.Itoa(s) + ".json?print=pretty"
