@@ -31,12 +31,17 @@ func GetHackerNews() []HackerNews {
 
 	var hns []HackerNews
 	var hn HackerNews
+	cnt := 0
 	for _, s := range idHn {
+		if cnt > 30 {
+			break
+		}
 		url := "https://hacker-news.firebaseio.com/v0/item/" + strconv.Itoa(s) + ".json?print=pretty"
 		res2, _ := http.Get(url)
 		robots, _ := ioutil.ReadAll(res2.Body)
 		json.Unmarshal(robots, &hn)
 		hns = append(hns, hn)
+		cnt += 1
 	}
 
 	return hns
