@@ -15,6 +15,7 @@ require (
 	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mattn/go-runewidth v0.0.7 // indirect
 	github.com/nsf/termbox-go v0.0.0-20190817171036-93860e161317
+	github.com/otiai10/opengraph v1.1.0 // indirect
 	github.com/peterh/liner v1.1.0 // indirect
 	github.com/rivo/tview v0.0.0-20191129065140-82b05c9fb329
 	github.com/sirupsen/logrus v1.4.2

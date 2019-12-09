@@ -14,14 +14,8 @@ func (nv nodeValue) String() string {
 	return string(nv)
 }
 
-func main() {
+func generateTreeNodes() []*widgets.TreeNode {
 	hns := GetHackerNews()
-
-	if err := ui.Init(); err != nil {
-		log.Fatalf("failed to init")
-	}
-	defer ui.Close()
-
 	var nodes []*widgets.TreeNode
 	for _, hn := range hns {
 		fmt.Println(hn.Score)
@@ -45,10 +39,31 @@ func main() {
 					Value: nodeValue("cmd+click →  " + hn.Url),
 					Nodes: nil,
 				},
+				{
+					Value: nodeValue("Description"),
+					Nodes: []*widgets.TreeNode{
+						{
+							Value: nodeValue(hn.Description),
+							Nodes: nil,
+						},
+					},
+				},
 			},
 		}
 		nodes = append(nodes, &node)
 	}
+
+	return nodes
+}
+
+func main() {
+
+	if err := ui.Init(); err != nil {
+		log.Fatalf("failed to init")
+	}
+	defer ui.Close()
+
+	nodes := generateTreeNodes()
 
 	t := widgets.NewTree()
 	t.Title = "Hacker News ClI"
@@ -58,24 +73,5 @@ func main() {
 	x, y := ui.TerminalDimensions()
 	t.SetRect(0, 0, x, y)
 	ui.Render(t)
-
-	uiEvents := ui.PollEvents()
-	for {
-		e := <-uiEvents
-		switch e.ID {
-		case "q", "<C-c>":
-			return
-		case "k":
-			t.ScrollUp()
-		case "j":
-			t.ScrollDown()
-		case "E":
-			t.ExpandAll()
-		case "C":
-			t.CollapseAll()
-		case "<Enter>":
-			t.ToggleExpand()
-		}
-		ui.Render(t)
-	}
+	Keybindings(t)
 }

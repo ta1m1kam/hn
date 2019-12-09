@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/otiai10/opengraph"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -9,11 +10,12 @@ import (
 )
 
 type HackerNews struct {
-	By    string `json:"by"`
-	Score int    `json:"score"`
-	Title string `json:"title"`
-	Type  string `json:"type"`
-	Url   string `json:"url"`
+	By          string `json:"by"`
+	Score       int    `json:"score"`
+	Title       string `json:"title"`
+	Type        string `json:"type"`
+	Url         string `json:"url"`
+	Description string
 }
 
 func GetHackerNews() []HackerNews {
@@ -37,9 +39,14 @@ func GetHackerNews() []HackerNews {
 			break
 		}
 		url := "https://hacker-news.firebaseio.com/v0/item/" + strconv.Itoa(s) + ".json?print=pretty"
-		res2, _ := http.Get(url)
-		robots, _ := ioutil.ReadAll(res2.Body)
-		json.Unmarshal(robots, &hn)
+		res, _ := http.Get(url)
+		body, _ := ioutil.ReadAll(res.Body)
+		json.Unmarshal(body, &hn)
+		og, err := opengraph.Fetch(hn.Url)
+		if err != nil {
+			log.Fatal(err)
+		}
+		hn.Description = og.Description
 		hns = append(hns, hn)
 		cnt += 1
 	}
