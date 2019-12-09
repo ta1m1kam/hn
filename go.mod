@@ -15,13 +15,15 @@ require (
 	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mattn/go-runewidth v0.0.7 // indirect
 	github.com/nsf/termbox-go v0.0.0-20190817171036-93860e161317
-	github.com/otiai10/opengraph v1.1.0 // indirect
+	github.com/otiai10/opengraph v1.1.0
 	github.com/peterh/liner v1.1.0 // indirect
 	github.com/rivo/tview v0.0.0-20191129065140-82b05c9fb329
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/tealeg/xlsx v1.0.5
+	github.com/urfave/cli v1.22.1
+	github.com/urfave/cli/v2 v2.0.0 // indirect
 	go.starlark.net v0.0.0-20191202231402-1e82a9dd93ba // indirect
 	golang.org/x/arch v0.0.0-20191126211547-368ea8f32fff // indirect
 	golang.org/x/sys v0.0.0-20191206220618-eeba5f6aabab // indirect

@@ -14,8 +14,8 @@ func (nv nodeValue) String() string {
 	return string(nv)
 }
 
-func generateTreeNodes() []*widgets.TreeNode {
-	hns := GetHackerNews()
+func generateTreeNodes(n int) []*widgets.TreeNode {
+	hns := GetHackerNews(n)
 	var nodes []*widgets.TreeNode
 	for _, hn := range hns {
 		fmt.Println(hn.Score)
@@ -56,14 +56,14 @@ func generateTreeNodes() []*widgets.TreeNode {
 	return nodes
 }
 
-func main() {
+func hnUi(n int) {
 
 	if err := ui.Init(); err != nil {
 		log.Fatalf("failed to init")
 	}
 	defer ui.Close()
 
-	nodes := generateTreeNodes()
+	nodes := generateTreeNodes(n)
 
 	t := widgets.NewTree()
 	t.Title = "Hacker News ClI"

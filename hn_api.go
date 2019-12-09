@@ -18,7 +18,7 @@ type HackerNews struct {
 	Description string
 }
 
-func GetHackerNews() []HackerNews {
+func GetHackerNews(n int) []HackerNews {
 	res, err := http.Get("https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty")
 	if err != nil {
 		log.Fatal(err)
@@ -35,7 +35,7 @@ func GetHackerNews() []HackerNews {
 	var hn HackerNews
 	cnt := 0
 	for _, s := range idHn {
-		if cnt > 29 {
+		if cnt > n {
 			break
 		}
 		url := "https://hacker-news.firebaseio.com/v0/item/" + strconv.Itoa(s) + ".json?print=pretty"
