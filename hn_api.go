@@ -10,7 +10,7 @@ import (
 
 type HackerNews struct {
 	By    string `json:"by"`
-	Score int64  `json:"score"`
+	Score int    `json:"score"`
 	Title string `json:"title"`
 	Type  string `json:"type"`
 	Url   string `json:"url"`
