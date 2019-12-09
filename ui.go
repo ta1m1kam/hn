@@ -51,6 +51,7 @@ func main() {
 	}
 
 	t := widgets.NewTree()
+	t.Title = "Hacker News ClI"
 	t.TextStyle = ui.NewStyle(ui.ColorYellow)
 	t.WrapText = false
 	t.SetNodes(nodes)
@@ -70,6 +71,8 @@ func main() {
 			t.ScrollDown()
 		case "E":
 			t.ExpandAll()
+		case "C":
+			t.CollapseAll()
 		case "<Enter>":
 			t.ToggleExpand()
 		}
