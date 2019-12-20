@@ -2,14 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/k0kubun/pp"
 	"github.com/otiai10/opengraph"
-
-	//"github.com/otiai10/opengraph"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
-	"sync"
+	"time"
 )
 
 type HackerNews struct {
@@ -22,35 +22,26 @@ type HackerNews struct {
 }
 
 func GetHackerNewsDetail(ids []int) []HackerNews {
-	wg := new(sync.WaitGroup)
 	var hns []HackerNews
-	var chn = make(chan HackerNews)
+	var hn HackerNews
 	for _, s := range ids {
-		wg.Add(1)
 		url := "https://hacker-news.firebaseio.com/v0/item/" + strconv.Itoa(s) + ".json?print=pretty"
-		go func(url string) {
-			var hn HackerNews
-			res, _ := http.Get(url)
-			body, _ := ioutil.ReadAll(res.Body)
-			json.Unmarshal(body, &hn)
-			if hn.Url != "" {
-				og, err := opengraph.Fetch(hn.Url)
-				if err != nil {
-					log.Fatal(err)
-				}
-				hn.Description = og.Description
-			}
-			chn <- hn
-			wg.Done()
-		}(url)
-		hns = append(hns, <-chn)
+		res, _ := http.Get(url)
+		body, _ := ioutil.ReadAll(res.Body)
+		json.Unmarshal(body, &hn)
+		og, err := opengraph.Fetch(hn.Url)
+		if err != nil {
+			log.Fatal(err)
+		}
+		hn.Description = og.Description
+		hns = append(hns, hn)
 	}
-	defer close(chn)
-	wg.Wait()
+	pp.Print(len(hns))
+	fmt.Println()
 	return hns
 }
 
-func GetHackerNews(n int) []HackerNews {
+func main() {
 	res, err := http.Get("https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty")
 	if err != nil {
 		log.Fatal(err)
@@ -63,7 +54,9 @@ func GetHackerNews(n int) []HackerNews {
 	var idHn []int
 	json.Unmarshal(body, &idHn)
 
-	//var hns []HackerNews
-	hns := GetHackerNewsDetail(idHn[0 : n-1])
-	return hns
+	n := 20
+	start := time.Now()
+	GetHackerNewsDetail(idHn[0 : n-1])
+	end := time.Now()
+	fmt.Printf("%f秒\n", (end.Sub(start)).Seconds())
 }

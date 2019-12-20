@@ -8,6 +8,7 @@ require (
 	github.com/gdamore/tcell v1.3.0
 	github.com/gizak/termui/v3 v3.1.0
 	github.com/go-delve/delve v1.3.2 // indirect
+	github.com/k0kubun/pp v3.0.1+incompatible // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/lib/pq v1.2.0
 	github.com/marcusolsson/tui-go v0.4.0
