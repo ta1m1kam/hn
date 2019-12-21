@@ -1,11 +1,12 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
+
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
-	"log"
-	"strconv"
 )
 
 type nodeValue string
@@ -14,8 +15,11 @@ func (nv nodeValue) String() string {
 	return string(nv)
 }
 
-func generateTreeNodes(n int) []*widgets.TreeNode {
-	hns := GetHackerNews(n)
+func generateTreeNodes(n int) ([]*widgets.TreeNode, error) {
+	hns, err := GetHackerNews(n)
+	if err != nil {
+		return nil, err
+	}
 	var nodes []*widgets.TreeNode
 	for _, hn := range hns {
 		fmt.Println(hn.Score)
@@ -53,17 +57,19 @@ func generateTreeNodes(n int) []*widgets.TreeNode {
 		nodes = append(nodes, &node)
 	}
 
-	return nodes
+	return nodes, nil
 }
 
-func hnUi(n int) {
-
+func hnUi(n int) error {
 	if err := ui.Init(); err != nil {
-		log.Fatalf("failed to init")
+		return errors.New("failed to init")
 	}
 	defer ui.Close()
 
-	nodes := generateTreeNodes(n)
+	nodes, err := generateTreeNodes(n)
+	if err != nil {
+		return err
+	}
 
 	t := widgets.NewTree()
 	t.Title = "Hacker News ClI"
@@ -74,4 +80,5 @@ func hnUi(n int) {
 	t.SetRect(0, 0, x, y)
 	ui.Render(t)
 	Keybindings(t)
+	return nil
 }

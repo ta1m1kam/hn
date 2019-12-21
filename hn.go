@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/urfave/cli"
-	"os"
 )
 
 func main() {
@@ -19,9 +18,7 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) error {
-		hnUi(c.Int("number"))
-
-		return nil
+		return hnUi(c.Int("number"))
 	}
-	app.Run(os.Args)
+	app.RunAndExitOnError()
 }
