@@ -3,13 +3,13 @@ package main
 import (
 	"encoding/json"
 	"sort"
+	"sync"
 
 	"github.com/otiai10/opengraph"
 
 	"io/ioutil"
 	"net/http"
 	"strconv"
-	"sync"
 )
 
 // HackerNews store entry on hackernews.
@@ -25,12 +25,15 @@ type HackerNews struct {
 
 // GetHackerNewsDetail return entries's detail on hackernews.
 func GetHackerNewsDetail(ids []int) ([]HackerNews, error) {
-	wg := new(sync.WaitGroup)
+	var wg sync.WaitGroup
 	var hns []HackerNews
-	var chn = make(chan HackerNews)
+	var chn = make(chan HackerNews, len(ids))
+
 	for _, s := range ids {
 		wg.Add(1)
 		go func(s int) {
+			defer wg.Done()
+
 			url := "https://hacker-news.firebaseio.com/v0/item/" + strconv.Itoa(s) + ".json?print=pretty"
 
 			var hn HackerNews
@@ -56,12 +59,14 @@ func GetHackerNewsDetail(ids []int) ([]HackerNews, error) {
 				hn.Description = og.Description
 			}
 			chn <- hn
-			wg.Done()
 		}(s)
-		hns = append(hns, <-chn)
 	}
-	defer close(chn)
 	wg.Wait()
+	close(chn)
+
+	for e := range chn {
+		hns = append(hns, e)
+	}
 
 	sort.Slice(hns, func(i, j int) bool {
 		return hns[i].n < hns[j].n
