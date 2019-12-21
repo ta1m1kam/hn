@@ -7,7 +7,6 @@ import (
 
 	"github.com/otiai10/opengraph"
 
-	"io/ioutil"
 	"net/http"
 	"strconv"
 )
@@ -43,11 +42,9 @@ func GetHackerNewsDetail(ids []int) ([]HackerNews, error) {
 			if err != nil {
 				return
 			}
-			body, err := ioutil.ReadAll(res.Body)
-			if err != nil {
-				return
-			}
-			err = json.Unmarshal(body, &hn)
+			defer res.Body.Close()
+
+			err = json.NewDecoder(res.Body).Decode(&hn)
 			if err != nil {
 				return
 			}
@@ -80,13 +77,10 @@ func GetHackerNews(n int) ([]HackerNews, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
 	var idHn []int
-	err = json.Unmarshal(body, &idHn)
+	err = json.NewDecoder(res.Body).Decode(&idHn)
 	if err != nil {
 		return nil, err
 	}
