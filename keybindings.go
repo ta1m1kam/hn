@@ -5,6 +5,7 @@ import (
 	"github.com/gizak/termui/v3/widgets"
 )
 
+// Keybindings do main loop.
 func Keybindings(t *widgets.Tree) {
 	uiEvents := ui.PollEvents()
 	for {

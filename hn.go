@@ -18,7 +18,7 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) error {
-		return hnUi(c.Int("number"))
+		return hnUI(c.Int("number"))
 	}
 	app.RunAndExitOnError()
 }

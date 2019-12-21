@@ -5,22 +5,23 @@ import (
 
 	"github.com/otiai10/opengraph"
 
-	//"github.com/otiai10/opengraph"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"sync"
 )
 
+// HackerNews store entry on hackernews.
 type HackerNews struct {
 	By          string `json:"by"`
 	Score       int    `json:"score"`
 	Title       string `json:"title"`
 	Type        string `json:"type"`
-	Url         string `json:"url"`
+	URL         string `json:"url"`
 	Description string
 }
 
+// GetHackerNewsDetail return entries's detail on hackernews.
 func GetHackerNewsDetail(ids []int) ([]HackerNews, error) {
 	wg := new(sync.WaitGroup)
 	var hns []HackerNews
@@ -42,8 +43,8 @@ func GetHackerNewsDetail(ids []int) ([]HackerNews, error) {
 			if err != nil {
 				return
 			}
-			if hn.Url != "" {
-				og, err := opengraph.Fetch(hn.Url)
+			if hn.URL != "" {
+				og, err := opengraph.Fetch(hn.URL)
 				if err != nil {
 					return
 				}
@@ -59,6 +60,7 @@ func GetHackerNewsDetail(ids []int) ([]HackerNews, error) {
 	return hns, nil
 }
 
+// GetHackerNews return entries on hackernews.
 func GetHackerNews(n int) ([]HackerNews, error) {
 	res, err := http.Get("https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty")
 	if err != nil {

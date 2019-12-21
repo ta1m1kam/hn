@@ -40,7 +40,7 @@ func generateTreeNodes(n int) ([]*widgets.TreeNode, error) {
 					Nodes: nil,
 				},
 				{
-					Value: nodeValue("cmd+click →  " + hn.Url),
+					Value: nodeValue("cmd+click →  " + hn.URL),
 					Nodes: nil,
 				},
 				{
@@ -60,7 +60,7 @@ func generateTreeNodes(n int) ([]*widgets.TreeNode, error) {
 	return nodes, nil
 }
 
-func hnUi(n int) error {
+func hnUI(n int) error {
 	if err := ui.Init(); err != nil {
 		return errors.New("failed to init")
 	}
