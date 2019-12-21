@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"sort"
 
 	"github.com/otiai10/opengraph"
 
@@ -13,6 +14,7 @@ import (
 
 // HackerNews store entry on hackernews.
 type HackerNews struct {
+	n           int
 	By          string `json:"by"`
 	Score       int    `json:"score"`
 	Title       string `json:"title"`
@@ -28,9 +30,12 @@ func GetHackerNewsDetail(ids []int) ([]HackerNews, error) {
 	var chn = make(chan HackerNews)
 	for _, s := range ids {
 		wg.Add(1)
-		url := "https://hacker-news.firebaseio.com/v0/item/" + strconv.Itoa(s) + ".json?print=pretty"
-		go func(url string) {
+		go func(s int) {
+			url := "https://hacker-news.firebaseio.com/v0/item/" + strconv.Itoa(s) + ".json?print=pretty"
+
 			var hn HackerNews
+			hn.n = s
+
 			res, err := http.Get(url)
 			if err != nil {
 				return
@@ -52,11 +57,15 @@ func GetHackerNewsDetail(ids []int) ([]HackerNews, error) {
 			}
 			chn <- hn
 			wg.Done()
-		}(url)
+		}(s)
 		hns = append(hns, <-chn)
 	}
 	defer close(chn)
 	wg.Wait()
+
+	sort.Slice(hns, func(i, j int) bool {
+		return hns[i].n < hns[j].n
+	})
 	return hns, nil
 }
 
