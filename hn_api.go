@@ -2,68 +2,89 @@ package main
 
 import (
 	"encoding/json"
+	"sort"
+	"sync"
+
 	"github.com/otiai10/opengraph"
 
-	//"github.com/otiai10/opengraph"
-	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
-	"sync"
 )
 
+// HackerNews store entry on hackernews.
 type HackerNews struct {
+	n           int
 	By          string `json:"by"`
 	Score       int    `json:"score"`
 	Title       string `json:"title"`
 	Type        string `json:"type"`
-	Url         string `json:"url"`
+	URL         string `json:"url"`
 	Description string
 }
 
-func GetHackerNewsDetail(ids []int) []HackerNews {
-	wg := new(sync.WaitGroup)
+// GetHackerNewsDetail return entries's detail on hackernews.
+func GetHackerNewsDetail(ids []int) ([]HackerNews, error) {
+	var wg sync.WaitGroup
 	var hns []HackerNews
-	var chn = make(chan HackerNews)
+	var chn = make(chan HackerNews, len(ids))
+
 	for _, s := range ids {
 		wg.Add(1)
-		url := "https://hacker-news.firebaseio.com/v0/item/" + strconv.Itoa(s) + ".json?print=pretty"
-		go func(url string) {
+		go func(s int) {
+			defer wg.Done()
+
+			url := "https://hacker-news.firebaseio.com/v0/item/" + strconv.Itoa(s) + ".json?print=pretty"
+
 			var hn HackerNews
-			res, _ := http.Get(url)
-			body, _ := ioutil.ReadAll(res.Body)
-			json.Unmarshal(body, &hn)
-			if hn.Url != "" {
-				og, err := opengraph.Fetch(hn.Url)
+			hn.n = s
+
+			res, err := http.Get(url)
+			if err != nil {
+				return
+			}
+			defer res.Body.Close()
+
+			err = json.NewDecoder(res.Body).Decode(&hn)
+			if err != nil {
+				return
+			}
+			if hn.URL != "" {
+				og, err := opengraph.Fetch(hn.URL)
 				if err != nil {
-					log.Fatal(err)
+					return
 				}
 				hn.Description = og.Description
 			}
 			chn <- hn
-			wg.Done()
-		}(url)
-		hns = append(hns, <-chn)
+		}(s)
 	}
-	defer close(chn)
 	wg.Wait()
-	return hns
+	close(chn)
+
+	for e := range chn {
+		hns = append(hns, e)
+	}
+
+	sort.Slice(hns, func(i, j int) bool {
+		return hns[i].n < hns[j].n
+	})
+	return hns, nil
 }
 
-func GetHackerNews(n int) []HackerNews {
+// GetHackerNews return entries on hackernews.
+func GetHackerNews(n int) ([]HackerNews, error) {
 	res, err := http.Get("https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty")
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
+	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
 	var idHn []int
-	json.Unmarshal(body, &idHn)
+	err = json.NewDecoder(res.Body).Decode(&idHn)
+	if err != nil {
+		return nil, err
+	}
 
 	//var hns []HackerNews
-	hns := GetHackerNewsDetail(idHn[0 : n-1])
-	return hns
+	return GetHackerNewsDetail(idHn[0 : n-1])
 }
