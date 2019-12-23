@@ -3,56 +3,72 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/k0kubun/pp"
 	"github.com/otiai10/opengraph"
-	"time"
-
-	//"github.com/otiai10/opengraph"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"sort"
 	"strconv"
 	"sync"
+	"time"
 )
 
 type HackerNews struct {
+	n           int
 	By          string `json:"by"`
 	Score       int    `json:"score"`
 	Title       string `json:"title"`
 	Type        string `json:"type"`
-	Url         string `json:"url"`
+	URL         string `json:"url"`
 	Description string
 }
 
-func GetHackerNewsDetail(ids []int) []HackerNews {
-	wg := new(sync.WaitGroup)
+func GetHackerNewsDetail(ids []int) ([]HackerNews, error) {
+	var wg sync.WaitGroup
 	var hns []HackerNews
 	var chn = make(chan HackerNews, len(ids))
+
 	for _, s := range ids {
 		wg.Add(1)
-		url := "https://hacker-news.firebaseio.com/v0/item/" + strconv.Itoa(s) + ".json?print=pretty"
-		var hn HackerNews
-		go func(url string) {
-			res, _ := http.Get(url)
-			body, _ := ioutil.ReadAll(res.Body)
-			json.Unmarshal(body, &hn)
-			if hn.Url != "" {
-				og, err := opengraph.Fetch(hn.Url)
+		go func(s int) {
+			defer wg.Done()
+			url := "https://hacker-news.firebaseio.com/v0/item/" + strconv.Itoa(s) + ".json?print=pretty"
+
+			var hn HackerNews
+			hn.n = s
+
+			res, err := http.Get(url)
+			if err != nil {
+				return
+			}
+			defer res.Body.Close()
+
+			err = json.NewDecoder(res.Body).Decode(&hn)
+			if err != nil {
+				return
+			}
+			if hn.URL != "" {
+				og, err := opengraph.Fetch(hn.URL)
 				if err != nil {
-					log.Fatal(err)
+					return
 				}
 				hn.Description = og.Description
 			}
 			chn <- hn
-			wg.Done()
-		}(url)
-		hns = append(hns, <-chn)
+		}(s)
 	}
-	defer close(chn)
 	wg.Wait()
-	pp.Print(len(hns))
-	fmt.Println()
-	return hns
+	close(chn)
+
+	for e := range chn {
+		hns = append(hns, e)
+	}
+
+	sort.Slice(hns, func(i, j int) bool {
+		return hns[i].n < hns[j].n
+	})
+	return hns, nil
 }
 
 func main() {
@@ -69,9 +85,13 @@ func main() {
 	json.Unmarshal(body, &idHn)
 
 	//var hns []HackerNews
-	n := 20
+	n, err := strconv.Atoi(os.Args[1])
+	fmt.Println(n)
+	if err != nil {
+		fmt.Print(err)
+	}
 	start := time.Now()
 	GetHackerNewsDetail(idHn[0 : n-1])
 	end := time.Now()
-	fmt.Printf("%f秒\n", (end.Sub(start)).Seconds())
+	fmt.Printf("%f seconds\n", (end.Sub(start)).Seconds())
 }
