@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/k0kubun/pp"
 	"github.com/otiai10/opengraph"
 	"io/ioutil"
 	"log"
@@ -17,28 +16,38 @@ type HackerNews struct {
 	Score       int    `json:"score"`
 	Title       string `json:"title"`
 	Type        string `json:"type"`
-	Url         string `json:"url"`
+	URL         string `json:"url"`
 	Description string
 }
 
-func GetHackerNewsDetail(ids []int) []HackerNews {
+func GetHackerNewsDetail(ids []int) ([]HackerNews, error) {
 	var hns []HackerNews
 	var hn HackerNews
 	for _, s := range ids {
 		url := "https://hacker-news.firebaseio.com/v0/item/" + strconv.Itoa(s) + ".json?print=pretty"
-		res, _ := http.Get(url)
-		body, _ := ioutil.ReadAll(res.Body)
-		json.Unmarshal(body, &hn)
-		og, err := opengraph.Fetch(hn.Url)
+		res, err := http.Get(url)
 		if err != nil {
-			log.Fatal(err)
+			continue
 		}
-		hn.Description = og.Description
+
+		err = json.NewDecoder(res.Body).Decode(&hn)
+		if err != nil {
+			continue
+		}
+
+		if hn.URL != "" {
+			og, err := opengraph.Fetch(hn.URL)
+			if err != nil {
+				continue
+			}
+			hn.Description = og.Description
+		}
+
 		hns = append(hns, hn)
+		res.Body.Close()
 	}
-	pp.Print(len(hns))
-	fmt.Println()
-	return hns
+
+	return hns, nil
 }
 
 func main() {
