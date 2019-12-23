@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 )
@@ -63,9 +64,13 @@ func main() {
 	var idHn []int
 	json.Unmarshal(body, &idHn)
 
-	n := 20
+	n, err := strconv.Atoi(os.Args[1])
+	fmt.Println(n)
+	if err != nil {
+		fmt.Print(err)
+	}
 	start := time.Now()
 	GetHackerNewsDetail(idHn[0 : n-1])
 	end := time.Now()
-	fmt.Printf("%f秒\n", (end.Sub(start)).Seconds())
+	fmt.Printf("%f seconds\n", (end.Sub(start)).Seconds())
 }
